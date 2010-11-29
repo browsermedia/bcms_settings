@@ -26,6 +26,7 @@ begin
     gemspec.files += Dir["lib/bcms_settings.rb"]
     gemspec.files += Dir["lib/bcms_settings/**/*"]
     gemspec.files += Dir["rails/init.rb"]
+    gemspec.add_dependency 'browsercms', '~> 3.1.2' 
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install jeweler"
