@@ -101,13 +101,13 @@ To delete values, call the delete method on the settings object:
     => #<Cms::Settings: bcms_s3 => {"account_id"=>"NEW_ID"}
 
 Keys can have almost any name, except for these:
-["inspect", "__send__", "delete", "instance_eval", "__metaclass__", "method_missing"]
+    inspect, __send__, delete, instance_eval, __metaclass__, method_missing
 
 
 ### Registering and deleting modules
 
-It is also possible to register and delete modules manually in addition to or
-as an alternative to caling Settings.synchronize.
+It is also possible to register and delete modules manually in addition or
+as an alternative to calling Settings.synchronize.
 
 To register modules:
 
@@ -119,21 +119,18 @@ then you can store, retrieve and delete arbitrary values:
     config.client = "Widgets INC"
     config.url = "http://example.com"
     config.sections = %w[A B C]
-
     config.url
     => "http://example.com
-
     config.delete("url")
-
     config.url
     => nil
 
-In reality, 'registering a module' only creates an object where
-to store values, so you can request sorage to the Settings module for
+In the background, what 'registering a module' does is create an object where
+to store values, so you can request storage to the Settings module for
 whatever porpose you like, povinding that:
 
-  1. The name you are trying to register is a valid BrowserCMS module
-  name and a valid Ruby method identifier, so this is valid:
+1. The name you are trying to register is a valid BrowserCMS module
+name and a valid Ruby method identifier, so this is valid:
 
       Cms::Settings.register("bcms_my_config")
 
@@ -141,8 +138,8 @@ whatever porpose you like, povinding that:
 
       Cms::Settings.register("My Config")
 
-  2. The name you are trying to register has not been registered
-  previously. Names passed to the register method must be unique.
+2. The name you are trying to register has not been previously registered.
+Names passed to the register method must be unique.
 
 
 To delete modules:
