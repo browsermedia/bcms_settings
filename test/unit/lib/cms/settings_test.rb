@@ -88,14 +88,53 @@ class SettingsTest < ActiveSupport::TestCase
     end
   end
 
-  test "raises NoMethodError for undefined methods that do not conform with BCMS module naming convention " do
+  test "raises NoMethodError for undefined methods that do not conform with BCMS module naming convention" do
     assert_raise(NoMethodError) do
       Cms::Settings.wibble
     end
   end
 
-  private
+  #TODO: The following tests for CmsModuleProxy should probably be split to a different file.
 
+  test "should store values for arbitrary keys" do
+    register_modules 'bcms_s3'
+    Cms::Settings.bcms_s3.account_id = "ACCOUNT_ID"
+    assert_equal "ACCOUNT_ID", Cms::Settings.bcms_s3.account_id
+  end
+
+  test "sohould store arrays" do
+    register_modules 'bcms_blog'
+    config = Cms::Settings.bcms_blog
+    config.options = %w[A B C]
+    assert_equal "C", config.options.last
+  end
+
+  test "should update values" do
+    register_modules 'bcms_blog'
+    config = Cms::Settings.bcms_blog
+    config.authors = ['Sue', 'Mike']
+    assert_equal 'Sue', config.authors[0]
+    config.authors[0] = 'Zoe'
+    assert_equal 'Zoe', config.authors[0]
+  end
+
+  test "should destroy key value pairs" do
+    register_modules 'bcms_wibble'
+    config = Cms::Settings.bcms_wibble
+    config.depth = 3
+    assert_equal 3, config.depth
+    config.delete("depth")
+    assert !config.depth
+  end
+
+  test "should raise NoMethodError for methods with arity > 1" do
+    register_modules 'bcms_wibble'
+    assert_raise(NoMethodError) do
+      Cms::Settings.bcms.wibble.something('a', 'b')
+    end
+  end
+
+  private
   def register_modules(*names)
     names.each {|n| CmsModule.create(:name => n, :settings => {})}
   end
