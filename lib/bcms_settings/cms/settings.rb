@@ -39,8 +39,10 @@ module Cms
     # get a configuration object whether they need it or not.
 
     def synchronize
-      register_modules(installed_modules - registered_modules)
-      remove_modules(managed_modules - installed_modules)
+      if CmsModule.table_exists?
+        register_modules(installed_modules - registered_modules)
+        remove_modules(managed_modules - installed_modules)
+      end
     end
 
     # Retruns an array of module names the Cms::Settings module knows
@@ -176,18 +178,16 @@ module Cms
     end
 
     def register_modules(module_names, managed = true)
-      if CmsModule.table_exists?
-        module_names.each do |name|
-          verify_module_name(name)
-          begin
-            CmsModule.create!(:name => name.to_s,
-                              :settings => {},
-                              :cms_managed => managed)
+      module_names.each do |name|
+        verify_module_name(name)
+        begin
+          CmsModule.create!(:name => name.to_s,
+                            :settings => {},
+                            :cms_managed => managed)
 
-          rescue ActiveRecord::RecordInvalid
-            raise ModuleConfigurationExists,
-              "The module #{name} is already registered."
-          end
+        rescue ActiveRecord::RecordInvalid
+          raise ModuleConfigurationExists,
+            "The module #{name} is already registered."
         end
       end
     end
