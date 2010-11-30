@@ -1,58 +1,4 @@
 module Cms
-  #  Cms::Settings provides an interface for storing and retrieving
-  #  arbitrary key value pairs and can be used as a persistent
-  #  global configuration store.
-  #
-  #  Cms::Settings stores key value pairs in attributes of ActiveRecord
-  #  objects. These objects, however, are not designed to be used
-  #  directly. Rather, this module provides an interface for easy
-  #  access to the storage objects.
-  #
-  #  For all installed bcms modules loaded as gems as defined by the BrowserCMS'
-  #  module instalation process, this module creates a namespaced key value
-  #  store automatically.
-  #
-  #  To know which bcms_modules the Settings module knows about:
-  #  Cms::Settings.modules => [] #an empty array for new projects.
-  #
-  #  If a BrowserCMS project declares the following gem dependencies
-  #  in environment.rb:
-  #
-  #  gem.bcms_s3
-  #  gem.bcms_seo_sitemap
-  #
-  #  Client code can access the following objects automatically:
-  #
-  #  Cms::Settings.bcms_s3 => #<Cms::Settings: bcms_s3 => {}>
-  #  Cms::Settings.bcms_seo_sitemap => #<Cms::Settings: bcms_seo_sitemap => {}>
-  #
-  #  To store key, value pairs just call an "=" method with an arbitrary name
-  #  and value:
-  #
-  #  Cms::Settings.bcms_s3.account_id = "ACCOUNT_ID"
-  #  Cms::Settings.bcms_s3.buckets = %w[bucket1 bucket2]
-  #
-  #  After adding these two values, the object looks like this:
-  #
-  #  Cms::Settings.bcms_s3 => <Cms::Settings: bcms_s3 => {"account_id"=>"ACCOUNT_ID", "buckets"=>["bucket1", "bucket2"]}>
-  #
-  #  To retrieve values:
-  #
-  #  Cms::Settings.bcms_s3.account_id => "ACCOUNT_ID"
-  #  Cms::Settings.bcms_s3.buckets.first = "bucket1"
-  #
-  #  To update keys, just assign new values:
-  #
-  #  Cms::Settings.bcms_s3.account_id = "NEW_ID"
-  #  Cms::Settings.bcms_s3.account_id => "NEW_ID"
-  #
-  #  To delete values, call the delete method on the settings object:
-  #
-  #  Cms::Settings.bcms_s3.delete("buckets")
-  #  Cms::Settings.bcms_s3 => #<Cms::Settings: bcms_s3 => {"account_id"=>"NEW_ID"}
-  #
-  #  Keys can have almost any name, except:
-  #  ["inspect", "__send__", "delete", "instance_eval", "__metaclass__", "method_missing", "__id__"]
 
   module Settings
 
@@ -115,16 +61,48 @@ module Cms
     # Manually registered modules are ignored by the synchronize method.
     #
     # Cms::Settings.register("bcms_foo")
-    # Cms::Settings.bcms_foo will be prsisted in the thatabase until
+    # Cms::Settings.bcms_foo will be prsisted in the the database until
     # manually deleted.
     #
     # Manually registered module names must conform to BCMS's module naming
     # conventions, so this call will raise an InvalidModuleName exception:
     # Cms::Settings.register("foo") => InvalidModuleName
     #
-    # Module names must also be unique:
+    # Modules can only be registered once:
     # Cms::Settings.modules =>  ["bcms_s3", "bcms_seo_sitemap"]
     # Cms::Settings.register("bcms_s3") => ModuleConfigurationExists
+    #
+    # ******************
+    # **IMPORTANT NOTE**
+    # ******************
+    # When developing modules that use the Settings API, it is necessary to
+    # register them manually since they can't declare themselves as
+    # dependencies. This can be done in an initializer, however, since
+    # modules can only be registered once, every time the modules' project
+    # boots, an exception will be raised.
+    #
+    # One possible workaround is to check if the module is registered already:
+    #
+    # unless Cms::Settings.modules.include?('bcms_seo_sitemap')
+    #   Cms::Settings.register('bcms_seo_sitemap')
+    # end
+    #
+    # A marginally better approach would be something like:
+    #
+    # unless Cms::Settings.registered?('bcms_seo_sitemap')
+    #   Cms::Settings.register('bcms_seo_sitemap')
+    # end
+    #
+    # Another possibility is to have the register method fail silently if the
+    # module already exists or just log a warning.
+    #
+    # I do like the exceptions approach because it makes it evident that
+    # somehow, somewhere, for some reason, someone registered that module
+    # previously and may be using the configuration object for something.
+    #
+    # This is particularly important because in reality, 'registered modules'
+    # need not to even be modules at all. Someone may just register
+    # 'bcms_my_configuration' for whatever purpose even from the console.
 
     def register(module_name)
       register_modules [module_name], false
