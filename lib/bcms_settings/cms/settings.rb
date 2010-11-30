@@ -186,7 +186,7 @@ module Cms
 
     def installed_modules
       Rails.configuration.gems.map do |g|
-        g.name if g.name =~ /^bcms_/
+        g.name if g.name =~ /^bcms_/ && g.name != 'bcms_settings'
       end.compact.uniq
     end
 
@@ -198,16 +198,18 @@ module Cms
     end
 
     def register_modules(module_names, managed = true)
-      module_names.each do |name|
-        verify_module_name(name)
-        begin
-          CmsModule.create!(:name => name.to_s,
-                            :settings => {},
-                            :cms_managed => managed)
+      if CmsModule.table_exists?
+        module_names.each do |name|
+          verify_module_name(name)
+          begin
+            CmsModule.create!(:name => name.to_s,
+                              :settings => {},
+                              :cms_managed => managed)
 
-        rescue ActiveRecord::RecordInvalid
-          raise ModuleConfigurationExists,
-            "The module #{name} is already registered."
+          rescue ActiveRecord::RecordInvalid
+            raise ModuleConfigurationExists,
+              "The module #{name} is already registered."
+          end
         end
       end
     end
