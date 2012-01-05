@@ -5,3 +5,7 @@ require File.expand_path('../config/application', __FILE__)
 require 'rake'
 
 BcmsSettings::Application.load_tasks
+
+# Otherwise, this enabled Bundler to build your gem
+require 'bundler'
+Bundler::GemHelper.install_tasks
