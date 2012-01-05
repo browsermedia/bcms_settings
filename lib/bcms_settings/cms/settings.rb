@@ -165,7 +165,7 @@ module Cms
     end
 
     def installed_modules
-      Rails.configuration.gems.map do |g|
+      Gem.loaded_specs.values.map do |g|
         g.name if g.name =~ /^bcms_/ && g.name != 'bcms_settings'
       end.compact.uniq
     end
@@ -213,7 +213,7 @@ module Cms
     # the CmsModule object is wrapped in an instance of the CmsModuleProxy
     # class, which provides acces to the underlying serialized hash through
     # arbitrary method names.
-    class CmsModuleProxy < BlankSlate
+    class CmsModuleProxy < ActiveSupport::BasicObject
       def initialize(cms_module)
         @cms_module = cms_module
       end

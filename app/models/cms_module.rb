@@ -13,7 +13,7 @@ class CmsModule < ActiveRecord::Base
 
   serialize :settings
 
-  named_scope :managed, :conditions => {:cms_managed => true},
+  scope :managed, :conditions => {:cms_managed => true},
                         :select => 'name'
 end
 
