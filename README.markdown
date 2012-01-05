@@ -21,37 +21,19 @@ except that it does not define any new routes and requires one
 additional step.
 
     gem install bcms_settings
-
-## Set up your application to use the module
-
-### 1. Edit config/environment.rb
-
-    config.gem "browsercms"
-    config.gem "bcms_settings"
-
-### 2. Run the following commands
-
-    script/generate browser_cms
-    rake db:migrate
-
-### 3. Add the following line to the browsercms.rb initializer
-
-    Cms::Settings.synchronize
-
+	rails generate cms:install bcms_settings
+	
 ## Usage
 
-### Cms::Settings.syncronize
-
-Calling this method in an initializer will keep your installed modules
-(as declared on environment.rb) in sync with the Settings module.
+### Accessing the settings
 
 If a BrowserCMS project declares the following gem dependencies
-in environment.rb:
+in Gemfile:
 
-    gem.bcms_s3
-    gem.bcms_seo_sitemap
+    gem "bcms_s3"
+    gem "bcms_seo_sitemap"
 
-client code can access the following objects automatically:
+Client code can access the following objects automatically:
 
     Cms::Settings.bcms_s3
     => #<Cms::Settings: bcms_s3 => {}>
@@ -60,7 +42,7 @@ client code can access the following objects automatically:
     => #<Cms::Settings: bcms_seo_sitemap => {}>
 
 if you uninstall bcms_xyz (by removing it from environment.rb)
-the corresponding settings oject will be destroyed for you.
+the corresponding settings object will be destroyed for you.
 
 To know which bcms_modules the Settings module knows about:
 
@@ -106,12 +88,11 @@ Keys can have almost any name, except for these:
 
 ### Registering and deleting modules
 
-It is also possible to register and delete modules manually in addition or
-as an alternative to calling Settings.synchronize.
+As of 0.1.0, you no longer need to register BrowserCMS modules explicitly, or use the Cms::Settings.synchronzie method. This module will automatically detected other BrowserCMS modules and create a setting storage for them. You can explicitly create new storages though for other settings. 
 
-To register modules:
+For example, to register a 'fake' modules:
 
-    Cms::Settings.register("bcms_my_module")
+    Cms::Settings.register("bcms_some_fake_module")
 
 then you can store, retrieve and delete arbitrary values:
 
@@ -127,7 +108,7 @@ then you can store, retrieve and delete arbitrary values:
 
 In the background, what 'registering a module' does is create an object where
 to store values, so you can request storage to the Settings module for
-whatever porpose you like, povinding that:
+whatever purpose you like, providing that:
 
 1. The name you are trying to register is a valid BrowserCMS module
 name and a valid Ruby method identifier, so this is valid:
@@ -148,16 +129,4 @@ To delete modules:
 
     Cms::Settings.bcms_by_config #Raises an exception
     => ModuleNotRegistered
-
-
-## Module development
-
-If you are developing a BrowserCMS module and want to use the Settings
-API you'll need to include something like this in an initializer while
-on development:
-
-    unless Cms::Settings.modules.include?('bcms_my_module')
-      Cms::Settings.register('bcms_my_module')
-    end
-
 
