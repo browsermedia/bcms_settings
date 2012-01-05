@@ -1,3 +1,5 @@
+require 'bcms_settings/cms_module'
+
 module Cms
 
   module Settings
