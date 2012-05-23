@@ -13,6 +13,8 @@ class CmsModule < ActiveRecord::Base
 
   serialize :settings
 
+  attr_accessible :name, :settings, :cms_managed
+  
   scope :managed, :conditions => {:cms_managed => true},
                         :select => 'name'
 end
